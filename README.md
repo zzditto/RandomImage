@@ -1,8 +1,13 @@
 # 随机图片服务
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python Version](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.128.2-009688.svg)](https://fastapi.tiangolo.com/)
+[![uv](https://img.shields.io/badge/uv-package_manager-purple.svg)](https://github.com/astral-sh/uv)
+
 一个基于FastAPI的随机图片获取和智能压缩服务，支持多种图片格式处理和高效的流量优化。
 
-## 功能特性
+## 🌟 功能特性
 
 - 🎲 **随机图片获取** - 从指定目录中随机选择图片
 - 🗜️ **智能压缩** - 根据图片大小自动调整压缩质量，显著减少流量消耗
@@ -10,6 +15,7 @@
 - ⚡ **缓存优化** - 内置LRU缓存机制，提高重复请求响应速度
 - 🛠️ **灵活配置** - 支持环境变量配置，易于部署和定制
 - 📊 **监控统计** - 提供详细的性能统计和健康检查接口
+- 🐳 **Docker支持** - 完整的Docker化部署方案
 
 ## 快速开始
 
