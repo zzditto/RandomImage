@@ -1,4 +1,5 @@
 """依赖注入模块"""
+
 from fastapi import Depends, HTTPException, status
 from typing import Optional
 
@@ -13,29 +14,30 @@ def get_image_params(
     quality: Optional[int] = None,
     format: Optional[str] = None,
     progressive: bool = True,
-    preserve_aspect_ratio: bool = True
+    preserve_aspect_ratio: bool = True,
 ) -> ImageRequestParams:
     """解析和验证图片请求参数"""
     # 验证参数
     if width is not None and width <= 0:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="宽度必须大于0"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="宽度必须大于0"
         )
-    
+
     if height is not None and height <= 0:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="高度必须大于0"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="高度必须大于0"
         )
-    
+
     if quality is not None:
-        if quality < settings.MIN_COMPRESSION_QUALITY or quality > settings.MAX_COMPRESSION_QUALITY:
+        if (
+            quality < settings.MIN_COMPRESSION_QUALITY
+            or quality > settings.MAX_COMPRESSION_QUALITY
+        ):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"压缩质量必须在 {settings.MIN_COMPRESSION_QUALITY}-{settings.MAX_COMPRESSION_QUALITY} 之间"
+                detail=f"压缩质量必须在 {settings.MIN_COMPRESSION_QUALITY}-{settings.MAX_COMPRESSION_QUALITY} 之间",
             )
-    
+
     # 转换格式参数
     image_format = None
     if format:
@@ -44,16 +46,16 @@ def get_image_params(
         except KeyError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"不支持的图片格式: {format}"
+                detail=f"不支持的图片格式: {format}",
             )
-    
+
     return ImageRequestParams(
         width=width,
         height=height,
         quality=quality,
         format=image_format,
         progressive=progressive,
-        preserve_aspect_ratio=preserve_aspect_ratio
+        preserve_aspect_ratio=preserve_aspect_ratio,
     )
 
 
