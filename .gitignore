@@ -186,3 +186,7 @@ data/
 
 # Docker
 .dockerignore
+
+.idea
+.qoder
+.ruff_cache
