@@ -164,13 +164,38 @@ GET /api/v1/info
 ```dockerfile
 FROM python:3.11-slim
 
+# 设置工作目录
 WORKDIR /app
-COPY . .
-RUN pip install uv
-RUN uv sync
 
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# 复制项目文件
+COPY . .
+
+# 安装uv
+RUN pip install uv
+
+# 安装项目依赖
+RUN uv sync --frozen
+
+# 暴露端口
 EXPOSE 8000
-CMD ["uvicorn", "src.random_image.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# 启动命令
+CMD ["uv", "run", "uvicorn", "src.random_image.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Docker构建和启动
+
+```shell
+# 构建
+docker build -t random_img:latest .
+
+# 启动
+docker run -d --name random_img -p 8000:8000 -e TZ=Asia/Shanghai -e IMAGE_DIR=/app/data -v /image/data:/app/data --network net random_img:latest
 ```
 
 ### systemd 服务
