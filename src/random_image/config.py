@@ -2,20 +2,25 @@
 
 import os
 from pathlib import Path
-from typing import List, Optional
+from typing import List
+
+from dotenv import load_dotenv
+
+# 加载 .env 文件（本地开发），不会覆盖已有的环境变量（Docker -e 传入的优先）
+load_dotenv()
 
 
 class Settings:
     """应用配置类"""
 
     # 服务器配置
-    HOST: str = os.getenv("HOST", "127.0.0.1")
+    HOST: str = os.getenv("HOST", "0.0.0.0")
     PORT: int = int(os.getenv("PORT", "8000"))
-    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
 
     # 图片目录配置
     IMAGE_DIRS: List[Path] = [
-        Path(os.getenv("IMAGE_DIR", "/Users/zz/Pictures"))  # 默认图片目录
+        Path(os.getenv("IMAGE_DIR", "/data/images"))
     ]
 
     # 支持的图片格式
@@ -28,17 +33,15 @@ class Settings:
 
     # 输出格式配置
     OUTPUT_FORMAT: str = os.getenv("OUTPUT_FORMAT", "WEBP")  # WEBP, JPEG, PNG
-    ENABLE_PROGRESSIVE: bool = os.getenv("PROGRESSIVE", "True").lower() == "true"
+    ENABLE_PROGRESSIVE: bool = os.getenv("PROGRESSIVE", "true").lower() == "true"
 
     # 缓存配置
-    ENABLE_CACHE: bool = os.getenv("ENABLE_CACHE", "True").lower() == "true"
-    CACHE_MAX_SIZE: int = int(os.getenv("CACHE_MAX_SIZE", "100"))  # 最大缓存图片数量
+    ENABLE_CACHE: bool = os.getenv("ENABLE_CACHE", "true").lower() == "true"
+    CACHE_MAX_SIZE: int = int(os.getenv("CACHE_MAX_SIZE", "100"))
 
     # 性能配置
-    MAX_IMAGE_SIZE: int = int(
-        os.getenv("MAX_IMAGE_SIZE", "2000")
-    )  # 最大图片尺寸（像素）
-    DEFAULT_WIDTH: int = int(os.getenv("DEFAULT_WIDTH", "800"))  # 默认输出宽度
+    MAX_IMAGE_SIZE: int = int(os.getenv("MAX_IMAGE_SIZE", "2000"))
+    DEFAULT_WIDTH: int = int(os.getenv("DEFAULT_WIDTH", "800"))
 
     @property
     def valid_image_dirs(self) -> List[Path]:

@@ -36,35 +36,31 @@ pip install -e .
 
 ### 配置环境
 
-创建 `.env` 文件或设置环境变量：
+复制 `.env.example` 为 `.env` 并按需修改：
 
 ```bash
-# 服务器配置
-HOST=127.0.0.1
-PORT=8000
-DEBUG=False
-
-# 图片目录配置
-IMAGE_DIR=/path/to/your/images
-
-# 压缩配置
-COMPRESSION_QUALITY=85
-OUTPUT_FORMAT=WEBP
-PROGRESSIVE=True
-
-# 缓存配置
-ENABLE_CACHE=True
-CACHE_MAX_SIZE=100
+cp .env.example .env
 ```
+
+主要配置项（`.env` 文件仅用于本地开发，Docker 部署请通过 `-e` 参数传入环境变量）：
+
+| 环境变量 | 默认值 | 说明 |
+|---------|--------|------|
+| `IMAGE_DIR` | `/data/images` | 图片目录路径 |
+| `COMPRESSION_QUALITY` | `85` | 默认压缩质量（60-95） |
+| `OUTPUT_FORMAT` | `WEBP` | 默认输出格式（WEBP/JPEG/PNG） |
+| `PORT` | `8000` | 服务器端口 |
+
+完整配置项见 `.env.example`。
 
 ### 运行服务
 
 ```bash
-# 开发模式
+# 开发模式（自动加载 .env 文件）
 uv run python -m src.random_image.main
 
 # 生产模式
-uvicorn src.random_image.main:app --host 0.0.0.0 --port 8000
+uv run uvicorn src.random_image.main:app --host 0.0.0.0 --port 8000
 ```
 
 服务启动后访问：
@@ -136,16 +132,17 @@ GET /api/v1/info
 
 | 环境变量 | 默认值 | 说明 |
 |---------|--------|------|
-| `HOST` | 127.0.0.1 | 服务器监听地址 |
+| `HOST` | 0.0.0.0 | 服务器监听地址 |
 | `PORT` | 8000 | 服务器端口 |
-| `DEBUG` | False | 调试模式 |
-| `IMAGE_DIR` | /Users/zz/Pictures | 图片目录路径 |
-| `COMPRESSION_QUALITY` | 85 | 默认压缩质量 |
-| `OUTPUT_FORMAT` | WEBP | 默认输出格式 |
-| `PROGRESSIVE` | True | 启用渐进式JPEG |
-| `ENABLE_CACHE` | True | 启用缓存 |
+| `DEBUG` | false | 调试模式 |
+| `IMAGE_DIR` | /data/images | 图片目录路径 |
+| `COMPRESSION_QUALITY` | 85 | 默认压缩质量（60-95） |
+| `OUTPUT_FORMAT` | WEBP | 默认输出格式（WEBP/JPEG/PNG） |
+| `PROGRESSIVE` | true | 启用渐进式JPEG |
+| `ENABLE_CACHE` | true | 启用缓存 |
 | `CACHE_MAX_SIZE` | 100 | 缓存最大条目数 |
 | `MAX_IMAGE_SIZE` | 2000 | 最大图片尺寸（像素） |
+| `DEFAULT_WIDTH` | 800 | 默认输出宽度（像素） |
 
 ## 性能优化
 
@@ -167,41 +164,39 @@ GET /api/v1/info
 
 ### Docker 部署
 
-```dockerfile
-FROM python:3.11-slim
+```bash
+# 构建镜像
+docker build -t random-image:latest .
 
-# 设置工作目录
-WORKDIR /app
-
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-# 复制项目文件
-COPY . .
-
-# 安装uv
-RUN pip install uv
-
-# 安装项目依赖
-RUN uv sync --frozen
-
-# 暴露端口
-EXPOSE 8000
-
-# 启动命令
-CMD ["uv", "run", "uvicorn", "src.random_image.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# 启动容器（通过 -e 传入配置，挂载图片目录）
+docker run -d \
+  --name random-image \
+  -p 8000:8000 \
+  -v /your/image/dir:/data/images \
+  -e IMAGE_DIR=/data/images \
+  -e TZ=Asia/Shanghai \
+  random-image:latest
 ```
 
-Docker构建和启动
+可选参数：`-e COMPRESSION_QUALITY=75`、`-e OUTPUT_FORMAT=JPEG`、`-e CACHE_MAX_SIZE=200` 等，完整列表见 `.env.example`。
 
-```shell
-# 构建
-docker build -t random_img:latest .
+#### Docker Compose
 
-# 启动
-docker run -d --name random_img -p 8000:8000 -e TZ=Asia/Shanghai -e IMAGE_DIR=/app/data -v /image/data:/app/data --network net random_img:latest
+```yaml
+services:
+  random-image:
+    image: random-image:latest
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - /your/image/dir:/data/images
+    environment:
+      - IMAGE_DIR=/data/images
+      - TZ=Asia/Shanghai
+      # - COMPRESSION_QUALITY=85
+      # - OUTPUT_FORMAT=WEBP
+    restart: unless-stopped
 ```
 
 ### systemd 服务
@@ -217,7 +212,8 @@ After=network.target
 Type=exec
 User=www-data
 WorkingDirectory=/path/to/random_image
-ExecStart=/usr/local/bin/uv run python -m src.random_image.main
+Environment=IMAGE_DIR=/your/image/dir
+ExecStart=/usr/local/bin/uv run uvicorn src.random_image.main:app --host 0.0.0.0 --port 8000
 Restart=always
 
 [Install]

@@ -9,6 +9,7 @@ dependencies = [
     "pillow>=12.1.0",
     "uvicorn>=0.40.0",
     "python-multipart>=0.0.17",
+    "python-dotenv>=1.0.0",
 ]
 
 [project.optional-dependencies]
