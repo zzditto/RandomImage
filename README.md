@@ -213,7 +213,7 @@ Type=exec
 User=www-data
 WorkingDirectory=/path/to/random_image
 Environment=IMAGE_DIR=/your/image/dir
-ExecStart=/usr/local/bin/uv run uvicorn src.random_image.main:app --host 0.0.0.0 --port 8000
+ExecStart=/usr/local/bin/uv run python -m src.random_image.main
 Restart=always
 
 [Install]
